@@ -6,7 +6,7 @@ defaults:
   - model: llama_3_1_8B_instruct
   - abstention_method: direct_abstention
   - abstention_detector: llm_judge_llama_3_1_8B_instruct
-  - correctness_evaluator: llm_correctness_judge_llama_3_1_8B_instruct
+  - correctness_evaluator: null
   # set abstention_detector_with_reasoning to llm_judge_llama_3_1_8B_instruct_with_reasoning to evaluate abstention in reasoning+response for S1, DeepSeek
   - abstention_detector_with_reasoning: null
 
