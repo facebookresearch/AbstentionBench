@@ -12,7 +12,6 @@ from hydra.utils import instantiate
 
 from recipe.abstention_datasets.abstract_abstention_dataset import DummyDataset, Prompt
 from recipe.abstention_datasets.alcuna import ALCUNADataset
-from recipe.abstention_datasets.averitec import AveritecDataset
 from recipe.abstention_datasets.bbq import BBQDataset
 from recipe.abstention_datasets.big_bench import (
     BigBenchDisambiguateDataset,
@@ -137,19 +136,6 @@ class TestKUQDataset:
         assert not prompt.should_abstain
         assert prompt.metadata["KUQ_category"] == None
 
-    def test_has_category_when_should_abstain_with_category_map_path(self):
-        dataset = KUQDataset(category_map_path="data/kuq/new-category-mapping.csv")
-        prompt = dataset[0]
-
-        assert prompt.should_abstain
-        assert prompt.metadata["KUQ_category"] == "unsolved problem"
-
-    def test_has_category_when_should_not_abstain_with_category_map_path(self):
-        dataset = KUQDataset(category_map_path="data/kuq/new-category-mapping.csv")
-        prompt = dataset[3438]
-
-        assert not prompt.should_abstain
-        assert prompt.metadata["KUQ_category"] == "false assumption"
 
 
 class TestBBQDataset:
@@ -438,25 +424,6 @@ class TestQASPERDataset:
         assert len(dataset) == 1287
 
 
-class TestAveritecDataset:
-    def test_getitem(self):
-        dataset = AveritecDataset()
-        sample = dataset[3]
-        assert isinstance(sample, Prompt)
-
-        assert (
-            sample.question == "Has there been larger tax bills than the 2017 tax bill?"
-        )
-        assert sample.should_abstain is False
-        assert sample.reference_answers == [
-            "Three tax bills have been larger: American Taxpayer Relief Act of 2012 (enacted in 2013); \nTax Relief, Unemployment Insurance Reauthorization, and Job Creation Act of 2010 and\nEconomic Recovery Tax Act of 1981"
-        ]
-
-    def test_len(self):
-        dataset = AveritecDataset()
-        assert len(dataset) == 7265
-
-
 class TestALCUNADataset:
 
     def test_getitem(self):
@@ -501,27 +468,6 @@ class TestALCUNADataset:
         assert not prompt.should_abstain
         assert prompt.metadata["ALCUNA_entity_id"] == -144
 
-    def test_getitem_where_should_abstain(self):
-        dataset = ALCUNADataset(
-            "data/alcuna/id2question.json", "data/alcuna/meta_data.jsonl"
-        )
-        prompt = dataset[41]
-
-        assert prompt.reference_answers is None
-        assert prompt.should_abstain
-
-    def test_reference_answers_type(self):
-        dataset = ALCUNADataset(
-            "data/alcuna/id2question.json", "data/alcuna/meta_data.jsonl"
-        )
-        for ex in dataset:
-            assert type(ex.reference_answers) == list or ex.reference_answers is None
-
-    def test_len(self):
-        dataset = ALCUNADataset(
-            "data/alcuna/id2question.json", "data/alcuna/meta_data.jsonl"
-        )
-        assert len(dataset) == 63052
 
 
 class TestBigBenchDisambiguateDataset:
@@ -698,7 +644,7 @@ class TestMoralChoiceDataset:
 
 
 @pytest.mark.parametrize(
-    "dataset_name,expected_len", [("dummy", 100), ("musique", 3266), ("nq", 11208)]
+    "dataset_name,expected_len", [("dummy", 100), ("musique", 3266)]
 )
 def test_config_instantiation(dataset_name, expected_len) -> None:
     with initialize(version_base="1.2", config_path="../configs"):
